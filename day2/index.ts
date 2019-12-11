@@ -1,13 +1,15 @@
-import { promises, readSync, readFile, writeFile } from "fs"
-import { split, reduce, map, tail } from "lodash"
+import { promises, readSync, writeFile } from "fs"
+import { reduce, tail } from "lodash"
 import { assert } from "console"
+import { file } from "../helper/file"
+import { parseCommaSeparatedArray } from "../helper/parseCommaSeparatedArray"
 
-type OpCode = 1 | 2 | 99
+export type OpCode = 1 | 2 | 99
 
 type Operation = [OpCode, number, number, number]
 
 export const processData = (data: number[], opIndex: number): number[] => {
-  const opCodes = generateOpcodes(data)
+  const opCodes = generateInstructions(data)
   const currentOp = opCodes[opIndex]
   const opCode = currentOp[0]
   // assert(opCode === 1 || opCode === 2 || opCode === 99, "Bad opcode", {
@@ -32,7 +34,7 @@ export const processData = (data: number[], opIndex: number): number[] => {
   return processData(data, ++opIndex)
 }
 
-const processOperation = (code: OpCode, first: number, second: number) => {
+const processOperation = (code: number, first: number, second: number) => {
   // if (code !== 1 && code !== 2) {
   //   throw new Error("bad op code: " + code)
   // }
@@ -42,13 +44,7 @@ const processOperation = (code: OpCode, first: number, second: number) => {
   return first * second
 }
 
-const parseFile = (str: string) => {
-  const arr = split(str, ",")
-  const numArr = map(arr, (str) => parseInt(str, 10))
-  return numArr
-}
-
-const generateOpcodes = (numArr: number[]) =>
+const generateInstructions = (numArr: number[]) =>
   reduce(
     numArr,
     (acc, el, i) => {
@@ -63,31 +59,14 @@ const generateOpcodes = (numArr: number[]) =>
     [] as Operation[]
   )
 
-const file = async () => {
-  const input = () =>
-    new Promise<string>((resolve, reject) => {
-      readFile("./day2/input.txt", (err, data) => {
-        if (err) {
-          return reject(err)
-        }
-        return resolve(data.toString())
-      })
-    })
-  try {
-    return await input()
-  } catch (error) {
-    console.error(error)
-  }
-}
-
 export const write = (day: number) => (puzzle: number, data: string | number) =>
   writeFile(`./day${day}/result${puzzle}.txt`, data, () => {})
 
 export const doPuzzleOne = async () => {
   try {
-    const input = await file()
+    const input = await file("./day2/input.txt")
     if (input) {
-      const data = parseFile(input)
+      const data = parseCommaSeparatedArray(input)
       const newData = ((d) => {
         d[1] = 12
         d[2] = 2
@@ -126,11 +105,14 @@ const findNumber = (
 
 export const doPuzzleTwo = async () => {
   try {
-    const input = await file()
+    const input = await file("./day2/input.txt")
     if (!input) throw new Error("no input")
-    const data = parseFile(input)
+    const data = parseCommaSeparatedArray(input)
     const output = findNumber(data, 0, 0)
-    write(2)(2, `Answer: ${output.answer} \nNoun: ${output.noun}`)
+    write(2)(
+      2,
+      `Answer: ${output.answer} \nNoun: ${output.noun}\nVerb:${output.verb}`
+    )
   } catch (error) {
     console.error(error)
   }

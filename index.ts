@@ -1,3 +1,3 @@
-import { doPuzzleTwo } from "./day2"
+import { doPuzzleTwo } from "./day5/day5"
 
 doPuzzleTwo()
