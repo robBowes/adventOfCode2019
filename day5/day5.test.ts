@@ -1,4 +1,4 @@
-import { compute } from "./day5"
+import { compute } from "./compute"
 
 describe("the intcode compluter", () => {
   test("less than eight position", () => {
